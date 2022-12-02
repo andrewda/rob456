@@ -1,0 +1,6 @@
+<launch>
+
+	<!-- Spin up a simulator.  -->
+	<include file="$(find stage_osu)/launch/simple_rooms.launch" />
+
+</launch>
