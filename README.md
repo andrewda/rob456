@@ -8,6 +8,9 @@ $ git clone https://github.com/andrewda/rob456
 
 # Move into the directory and run catkin_make
 $ cd rob456 && catkin_make
+
+# For lab3, make sure slam-gmapping is installed
+$ sudo apt install ros-noetic-slam-gmapping
 ```
 
 ## Running
