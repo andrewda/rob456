@@ -28,6 +28,9 @@ class RobotController:
 		self._odom = None
 		self._map_data = None
 
+		self._point = None
+		self._map = None
+
 		# We're going to use TF, so we'll need a transform listener.
 		self.transform_listener = tf.TransformListener()
 
@@ -78,6 +81,9 @@ class RobotController:
 			point = self.transform_listener.transformPoint('map', point)
 		except:
 			point = None
+
+		self._point = point
+		self._map = map
 
 		self.map_update(point, map, self._map_data)
 

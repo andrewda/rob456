@@ -12,6 +12,7 @@ import exploring as exploring
 import numpy as np
 
 from actionlib_msgs.msg import GoalStatus
+from std_msgs.msg import String
 
 class StudentController(RobotController):
 	'''
@@ -21,6 +22,21 @@ class StudentController(RobotController):
 	'''
 	def __init__(self):
 		super().__init__()
+
+		self.goal = None
+
+		# TODO: this subscription only seems to work 1 time?
+		self._update_path_sub = rospy.Subscriber('update_path', String, self._update_path_callback, queue_size=10)
+
+
+	def _update_path_callback(self, _a):
+		rospy.loginfo(f'Got _update_path_callback: {_a}')
+
+		self.goal = None
+
+		self.map_update(self._point, self._map, self._map_data)
+
+		rospy.loginfo('Done _update_path_callback!')
 
 
 	def distance_update(self, distance):
@@ -68,14 +84,15 @@ class StudentController(RobotController):
 
 		robot_start_loc = (x, y)
 
-		all_unseen = exploring.find_all_possible_goals(im_thresh_fattened)
-		best_unseen = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
+		if self.goal is None:
+			all_unseen = exploring.find_all_possible_goals(im_thresh_fattened)
+			self.goal = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
 
 		# plot_with_explore_points(im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, best_pt=best_unseen)
 
-		rospy.loginfo(f'Got best unseen! From {robot_start_loc} to {best_unseen}')
+		rospy.loginfo(f'Got best unseen! From {robot_start_loc} to {self.goal}')
 
-		path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, best_unseen)
+		path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, self.goal)
 		waypoints = exploring.find_waypoints(im_thresh, path)
 		# path_planning.plot_with_path(im, im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, goal_loc=best_unseen, path=waypoints)
 
@@ -85,6 +102,8 @@ class StudentController(RobotController):
 
 		controller.set_waypoints(waypoints)
 		controller.send_points()
+
+		rospy.loginfo('Points have been sent!')
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ from new_driver import Driver
 from math import atan2, tanh, sqrt, copysign, pi
 import numpy as np
 
+from std_msgs.msg import String
 
 class StudentDriver(Driver):
 	'''
@@ -20,6 +21,7 @@ class StudentDriver(Driver):
 
 		self.avoiding = False
 		self.avoid_direction = None
+
 
 	def get_twist(self, target, lidar):
 		'''
@@ -39,20 +41,6 @@ class StudentDriver(Driver):
 		Returns:
 			A Twist message, containing the commanded robot velocities.
 		'''
-		# angle = atan2(target[1], target[0])
-		# distance = sqrt(target[0] ** 2 + target[1] **2)
-		# rospy.loginfo(f'Distance: {distance:.2f}, angle: {angle:.2f}')
-
-		# # This builds a Twist message with all elements set to zero.
-		# command = Driver.zero_twist()
-
-		# # Forwards velocity goes here, in meters per second.
-		# command.linear.x = 0.1
-
-		# # Rotational velocity goes here, in radians per second.  Positive is counter-clockwise.
-		# command.angular.z = 0.1
-
-		# return command
 
 		command = Driver.zero_twist()
 
@@ -67,7 +55,7 @@ class StudentDriver(Driver):
 		angle = atan2(target[1], target[0]) * 180/pi
 		distance = sqrt(target[0] ** 2 + target[1] ** 2)
 
-		rospy.loginfo(f'To target: {angle}*, {distance}m')
+		# rospy.loginfo(f'To target: {angle}*, {distance}m')
 
 		# Get 1/2 width values using trig
 		x = np.abs(lidar.ranges * np.sin(thetas))
@@ -83,8 +71,6 @@ class StudentDriver(Driver):
 		idx_closest = np.argmin(scans_infront)
 		idx_closest_180 = np.argmin(lidar_scan)
 
-		rospy.loginfo('000')
-
 		# Get shortest scan distance
 		nearest_obstacle = scans_infront[idx_closest]
 		nearest_obstacle_180 = lidar_scan[idx_closest_180]
@@ -97,8 +83,6 @@ class StudentDriver(Driver):
 		# Adjust speeds along sigmoid function
 		x_speed = 8 / (1 + np.exp(5 - shortest)) if np.abs(angle) < 30 else 0
 		angular_speed = (2 / (1 + np.exp(-angle / 10)) - 1) * 0.5
-
-		rospy.loginfo('100')
 
 		######################
 		# Obstacle Avoidance #
@@ -114,19 +98,21 @@ class StudentDriver(Driver):
 			self.avoid_direction = None
 
 		if self.avoiding:
-			rospy.loginfo(f'Avoiding! In front: {nearest_obstacle:.4f}m ({nearest_obstacle_angle:.2f}*), 180: {nearest_obstacle_180:.4f}m ({nearest_obstacle_180_angle:.2f}*)')
+			# rospy.loginfo(f'Avoiding! In front: {nearest_obstacle:.4f}m ({nearest_obstacle_angle:.2f}*), 180: {nearest_obstacle_180:.4f}m ({nearest_obstacle_180_angle:.2f}*)')
 
 			x_speed = 1 / (1 + np.exp(5 - nearest_obstacle_180 * 5)) if nearest_obstacle > 0.38 else 0
 			angular_speed = 0.15 * self.avoid_direction if nearest_obstacle < 0.5 else 0
-
-		rospy.loginfo('200')
 
 		# This sets the move forward speed (as before)
 		command.linear.x = x_speed
 		# This sets the angular turn speed (in radians per second)
 		command.angular.z = angular_speed
 
-		rospy.loginfo(command)
+		rospy.loginfo(x_speed)
+
+		if x_speed < 0.001:
+			rospy.loginfo('Updating path!')
+			self._update_path_pub.publish('abc')
 
 		return command
 

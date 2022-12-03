@@ -16,7 +16,7 @@ import actionlib
 import tf
 
 from lab2.msg import NavTargetAction, NavTargetResult, NavTargetFeedback
-
+from std_msgs.msg import String
 
 class Driver:
 	def __init__(self, position_source, threshold=0.1):
@@ -29,6 +29,8 @@ class Driver:
 		self.target_pub = rospy.Publisher('current_target', Marker, queue_size=1)
 
 		self._lidar_sub = rospy.Subscriber('base_scan', LaserScan, self._lidar_callback, queue_size=10)
+
+		self._update_path_pub = rospy.Publisher('update_path', String, queue_size=10)
 
 		# Action client
 		self._action_server = actionlib.SimpleActionServer('nav_target', NavTargetAction, execute_cb=self._action_callback, auto_start=False)
@@ -110,6 +112,9 @@ class Driver:
 			except:
 				return
 		else:
+			# TODO: right here, we need to tell controller to create a new path
+			self._update_path_pub.publish('123')
+			rospy.loginfo('No target point!')
 			command = Driver.zero_twist()
 
 		self._cmd_pub.publish(command)
