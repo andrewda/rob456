@@ -78,11 +78,12 @@ class RobotController:
 		point.point = self._odom.pose.pose.position
 
 		try:
-			point = self.transform_listener.transformPoint('map', point)
+			self._point = self.transform_listener.transformPoint('map', point)
 		except:
+			rospy.loginfo('In _map_callback, point is None')
 			point = None
 
-		self._point = point
+		# self._point = point
 		self._map = map
 
 		self.map_update(point, map, self._map_data)

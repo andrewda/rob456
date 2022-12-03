@@ -100,7 +100,7 @@ class StudentDriver(Driver):
 		if self.avoiding:
 			# rospy.loginfo(f'Avoiding! In front: {nearest_obstacle:.4f}m ({nearest_obstacle_angle:.2f}*), 180: {nearest_obstacle_180:.4f}m ({nearest_obstacle_180_angle:.2f}*)')
 
-			x_speed = 1 / (1 + np.exp(5 - nearest_obstacle_180 * 5)) if nearest_obstacle > 0.38 else 0
+			x_speed = 2 / (1 + np.exp(5 - nearest_obstacle_180 * 5)) if nearest_obstacle > 0.38 else 0
 			angular_speed = 0.15 * self.avoid_direction if nearest_obstacle < 0.5 else 0
 
 		# This sets the move forward speed (as before)

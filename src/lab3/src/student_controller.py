@@ -28,13 +28,15 @@ class StudentController(RobotController):
 		# TODO: this subscription only seems to work 1 time?
 		self._update_path_sub = rospy.Subscriber('update_path', String, self._update_path_callback, queue_size=10)
 
+		self._last_plan = None
+
 
 	def _update_path_callback(self, _a):
 		rospy.loginfo(f'Got _update_path_callback: {_a}')
 
 		self.goal = None
 
-		self.map_update(self._point, self._map, self._map_data)
+		self.do_map_update(self._point, self._map, self._map_data)
 
 		rospy.loginfo('Done _update_path_callback!')
 
@@ -67,11 +69,24 @@ class StudentController(RobotController):
 			map_data:	A MapMetaData containing the current map meta data.
 		'''
 
+		pass
+
+
+	def do_map_update(self, point, map, map_data):
 		if point is None:
 			rospy.loginfo('Point is none, returning')
 			return
 
-		rospy.loginfo('Got a map update.')
+		if self._last_plan is not None and self._last_plan - rospy.Time.now() > rospy.Time(30):
+			rospy.loginfo('Got path update request, but already updated too recently')
+			return
+
+		if len(self._waypoints) > 0:
+			rospy.loginfo(f'Got path update request, but {len(self._waypoints)} waypoints remain')
+			return
+
+
+		rospy.loginfo('Updating path.')
 		rospy.loginfo(self.action_client.get_state())
 
 		im = np.array(map.data).reshape(4000, 4000)
@@ -101,7 +116,7 @@ class StudentController(RobotController):
 		rospy.loginfo(waypoints)
 
 		controller.set_waypoints(waypoints)
-		controller.send_points()
+		# controller.send_points()
 
 		rospy.loginfo('Points have been sent!')
 
