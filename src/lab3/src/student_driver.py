@@ -71,6 +71,13 @@ class StudentDriver(Driver):
 		idx_closest = np.argmin(scans_infront)
 		idx_closest_180 = np.argmin(lidar_scan)
 
+		# half_idx = int(len(lidar_scan) / 2)
+		# scan_left = lidar_scan[:half_idx]
+		# scan_right = lidar_scan[half_idx:]
+
+		# avg_scan_left = np.mean(scan_left)
+		# avg_scan_right = np.mean(scan_right)
+
 		# Get shortest scan distance
 		nearest_obstacle = scans_infront[idx_closest]
 		nearest_obstacle_180 = lidar_scan[idx_closest_180]
@@ -87,6 +94,8 @@ class StudentDriver(Driver):
 		######################
 		# Obstacle Avoidance #
 		######################
+
+		# TODO: make this smarter
 
 		# If less than 1m in front of a wall, avoid
 		if nearest_obstacle < 0.5 and nearest_obstacle < distance and not self.avoiding:

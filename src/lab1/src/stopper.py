@@ -36,17 +36,6 @@ def callback(scan):
 	# Doing this for you - get out theta values for each range/distance reading
 	thetas = np.linspace(angle_min, angle_max, num_readings)
 
-	# TODO: Determine what the closest obstacle/reading is for scans in front of the robot
-	#  Step 1: Determine which of the range readings correspond to being "in front of" the robot (see comment at top)
-	#    Remember that robot scans are in the robot's coordinate system - theta = 0 means straight ahead
-	#  Step 2: Get the minimum distance to the closest object
-	#  Step 3: Use the closest distance from above to decide when to stop
-	#  Step 4: Scale how fast you move by the distance to the closet object (tanh is handy here...)
-	#  Step 5: Make sure to actually stop if close to 1 m
-	# Finally, set t.linear.x to be your desired speed (0 if stop)
-	# Suggestion: Do this with a for loop before being fancy with numpy (which is substantially faster)
-	# DO NOT hard-wire in the number of readings, or the min/max angle. You CAN hardwire in the size of the robot
-
 	# Get 1/2 width values using trig
 	x = np.abs(scan.ranges * np.sin(thetas))
 
@@ -68,12 +57,6 @@ def callback(scan):
 	t.angular.x = 0.0
 	t.angular.y = 0.0
 	t.angular.z = 0.0
-
-	# TODO:
-	# Step 1: Use the closest distance from above to decide when to stop (the current solution will stop if
-	#   there's anything near the robot)
-	# Step 2: Scale how fast you move by the distance to the closet object (tanh is handy here...)
-	# Step 3: Make sure to actually stop if close to 1 m
 
 	# Get shortest scan distance
 	shortest = scans_infront[idx_closest]

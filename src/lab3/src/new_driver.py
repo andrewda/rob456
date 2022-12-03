@@ -112,7 +112,6 @@ class Driver:
 			except:
 				return
 		else:
-			# TODO: right here, we need to tell controller to create a new path
 			self._update_path_pub.publish('123')
 			rospy.loginfo('No target point!')
 			command = Driver.zero_twist()

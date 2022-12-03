@@ -25,7 +25,6 @@ class StudentController(RobotController):
 
 		self.goal = None
 
-		# TODO: this subscription only seems to work 1 time?
 		self._update_path_sub = rospy.Subscriber('update_path', String, self._update_path_callback, queue_size=10)
 
 		self._last_plan = None

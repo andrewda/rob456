@@ -268,8 +268,6 @@ def dijkstra(im, robot_loc, goal_loc):
 	# Now check that we actually found the goal node
 	try_2 = None
 	if not goal_loc in visited:
-		# TODO: Deal with not being able to get to the goal loc
-		# BEGIN SOLULTION
 		best = 1e30
 		for v in visited.items():
 			if v[0] is not None and v[0] < best:
