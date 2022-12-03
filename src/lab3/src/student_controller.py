@@ -7,6 +7,11 @@ import signal
 
 from controller import RobotController
 
+import path_planning as path_planning
+import exploring as exploring
+import numpy as np
+
+from actionlib_msgs.msg import GoalStatus
 
 class StudentController(RobotController):
 	'''
@@ -16,6 +21,7 @@ class StudentController(RobotController):
 	'''
 	def __init__(self):
 		super().__init__()
+
 
 	def distance_update(self, distance):
 		'''
@@ -28,7 +34,9 @@ class StudentController(RobotController):
 		Parameters:
 			distance:	The distance to the current goal.
 		'''
-		rospy.loginfo(f'Distance: {distance}')
+		# rospy.loginfo(f'Distance: {distance}')
+		pass
+
 
 	def map_update(self, point, map, map_data):
 		'''
@@ -42,18 +50,41 @@ class StudentController(RobotController):
 			map:		An OccupancyGrid containing the current version of the map.
 			map_data:	A MapMetaData containing the current map meta data.
 		'''
+
+		if point is None:
+			rospy.loginfo('Point is none, returning')
+			return
+
 		rospy.loginfo('Got a map update.')
+		rospy.loginfo(self.action_client.get_state())
 
-		# It's possible that the position passed to this function is None.  This try-except block will deal
-		# with that.  Trying to unpack the position will fail if it's None, and this will raise an exception.
-		# We could also explicitly check to see if the point is None.
-		try:
-			# The (x, y) position of the robot can be retrieved like this.
-			robot_position = (point.point.x, point.point.y)
+		im = np.array(map.data).reshape(4000, 4000)
+		im_thresh = path_planning.convert_image(im, 0.7, 0.9)
 
-			rospy.loginfo(f'Robot is at {robot_position} {point.header.frame_id}')
-		except:
-			rospy.loginfo('No odometry information')
+		im_thresh_fattened = path_planning.fatten_image(im_thresh, 4)
+
+		x = int(point.point.x / map_data.resolution + 2000)
+		y = int(point.point.y / map_data.resolution + 2000)
+
+		robot_start_loc = (x, y)
+
+		all_unseen = exploring.find_all_possible_goals(im_thresh_fattened)
+		best_unseen = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
+
+		# plot_with_explore_points(im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, best_pt=best_unseen)
+
+		rospy.loginfo(f'Got best unseen! From {robot_start_loc} to {best_unseen}')
+
+		path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, best_unseen)
+		waypoints = exploring.find_waypoints(im_thresh, path)
+		# path_planning.plot_with_path(im, im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, goal_loc=best_unseen, path=waypoints)
+
+		waypoints = [((x - 2000) * map_data.resolution, (y - 2000) * map_data.resolution) for x, y in waypoints]
+
+		rospy.loginfo(waypoints)
+
+		controller.set_waypoints(waypoints)
+		controller.send_points()
 
 
 if __name__ == '__main__':
@@ -62,6 +93,20 @@ if __name__ == '__main__':
 
 	# Start the controller.
 	controller = StudentController()
+
+
+	# im, im_thresh = path_planning.open_image("map.pgm")
+
+	# im_thresh_fattened = path_planning.fatten_image(im_thresh, 4)
+
+	# robot_start_loc = (1900, 2100)
+
+	# all_unseen = find_all_possible_goals(im_thresh_fattened)
+	# best_unseen = find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
+
+	# path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, best_unseen)
+	# waypoints = find_waypoints(im_thresh, path)
+
 
 	# This will move the robot to a set of fixed waypoints.  You should not do this, since you don't know
 	# if you can get to all of these points without building a map first.  This is just to demonstrate how

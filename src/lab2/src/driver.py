@@ -139,11 +139,6 @@ class Driver:
 	def get_twist(self, target, lidar):
 		command = Driver.zero_twist()
 
-		# TODO:
-		#  Step 1) Calculate the angle the robot has to turn to in order to point at the target
-		#  Step 2) Set your speed based on how far away you are from the target, as before
-		#  Step 3) Add code that veers left (or right) to avoid an obstacle in front of it
-
 		angle_min = lidar.angle_min
 		angle_max = lidar.angle_max
 		num_readings = len(lidar.ranges)

@@ -16,5 +16,6 @@
 	</node>
 
 	<node pkg="lab3" name="driver" type="student_driver.py" />
+	<node pkg="lab3" name="controller" type="student_controller.py" />
 
 </launch>

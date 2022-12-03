@@ -37,3 +37,13 @@ $ rosrun lab2 driver.py
 # Run the waypoint publisher
 $ rosrun lab2 send_points.py
 ```
+
+### Lab 3
+
+```bash
+# Launch the world
+$ roslaunch lab3 lab3.launch
+
+# Run the controller code
+$ rosrun lab3 student_controller.py
+```
