@@ -51,6 +51,7 @@ class StudentController(RobotController):
 		Parameters:
 			distance:	The distance to the current goal.
 		'''
+		# TODO: implement this
 		# rospy.loginfo(f'Distance: {distance}')
 		pass
 
@@ -126,20 +127,6 @@ if __name__ == '__main__':
 
 	# Start the controller.
 	controller = StudentController()
-
-
-	# im, im_thresh = path_planning.open_image("map.pgm")
-
-	# im_thresh_fattened = path_planning.fatten_image(im_thresh, 4)
-
-	# robot_start_loc = (1900, 2100)
-
-	# all_unseen = find_all_possible_goals(im_thresh_fattened)
-	# best_unseen = find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
-
-	# path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, best_unseen)
-	# waypoints = find_waypoints(im_thresh, path)
-
 
 	# This will move the robot to a set of fixed waypoints.  You should not do this, since you don't know
 	# if you can get to all of these points without building a map first.  This is just to demonstrate how

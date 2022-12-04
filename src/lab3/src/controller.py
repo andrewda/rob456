@@ -53,6 +53,7 @@ class RobotController:
 		# Set up a signal handler to deal with ctrl-c so that we close down gracefully.
 		signal.signal(signal.SIGINT, self._shutdown)
 
+
 	@classmethod
 	def _generate_point(cls, p):
 		'''This function takes an (x, y) tuple, and returns a PointStamped in the map frame.'''
@@ -65,12 +66,15 @@ class RobotController:
 
 		return map_point
 
+
 	def _shutdown(self, sig, frame):
 		self.set_waypoints([])
 		sys.exit()
 
+
 	def _odom_callback(self, odom):
 		self._odom = odom
+
 
 	def _map_callback(self, map):
 		point = PointStamped()
@@ -88,8 +92,10 @@ class RobotController:
 
 		self.map_update(point, map, self._map_data)
 
+
 	def _map_data_callback(self, data):
 		self._map_data = data
+
 
 	def _marker_callback(self, _):
 		if not self._waypoints:
@@ -143,14 +149,17 @@ class RobotController:
 
 		self.marker_pub.publish(array)
 
+
 	def _feedback_callback(self, feedback):
 		self.distance_update(feedback.distance.data)
+
 
 	def set_waypoints(self, points):
 		self.action_client.cancel_goal()
 
 		with self.mutex:
 			self._waypoints = [RobotController._generate_point(p) for p in points]
+
 
 	def send_points(self):
 		rate = rospy.Rate(10)
@@ -172,10 +181,12 @@ class RobotController:
 
 			rate.sleep()
 
+
 	def distance_update(self, distance):
 		""" This is a dummy class method that will be overwritten by the one in student_controller - change that
 		 one, NOT this one"""
 		raise NotImplemented('distance_update() not implemented')
+
 
 	def map_update(self, point, map, map_data):
 		""" This is a dummy class method that will be overwritten by the one in student_controller - change that

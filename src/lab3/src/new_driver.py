@@ -36,6 +36,7 @@ class Driver:
 		self._action_server = actionlib.SimpleActionServer('nav_target', NavTargetAction, execute_cb=self._action_callback, auto_start=False)
 		self._action_server.start()
 
+
 	@classmethod
 	def zero_twist(cls):
 		t = Twist()
@@ -47,6 +48,7 @@ class Driver:
 		t.angular.z = 0.0
 
 		return t
+
 
 	# Respond to the action request.
 	def _action_callback(self, goal):
@@ -89,6 +91,7 @@ class Driver:
 		result.success.data = True
 		self._action_server.set_succeeded(result)
 
+
 	def _lidar_callback(self, lidar):
 		if self._target_point:
 			self._target_point.header.stamp = rospy.Time.now()
@@ -117,6 +120,7 @@ class Driver:
 			command = Driver.zero_twist()
 
 		self._cmd_pub.publish(command)
+
 
 	def get_twist(self, target, lidar):
 		""" This is a dummy class method that will be overwritten by the one in student_driver - change that
