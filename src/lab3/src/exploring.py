@@ -147,6 +147,7 @@ def find_all_possible_goals(im):
 
 	return possible_goals
 
+
 def find_best_point(im, possible_points, robot_loc):
 	""" Pick one of the unseen points to go to
 	@param im - thresholded image
@@ -175,6 +176,7 @@ def find_waypoints(im, path):
 		a1 = math.atan2(path[i][1] - path[i - 1][1], path[i][0] - path[i - 1][0])
 		a2 = math.atan2(path[i + 1][1] - path[i][1], path[i + 1][0] - path[i][0])
 
+		# TODO: give this a little more tolerance, e.g. 0.1
 		if a1 != a2:
 			waypoints.append(path[i])
 

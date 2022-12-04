@@ -80,7 +80,7 @@ class RobotController:
 		point.header = self._odom.header
 		# point.header.stamp = rospy.Time.now() - rospy.Time(0.05)
 		point.point = self._odom.pose.pose.position
-		rospy.loginfo(point)
+		# rospy.loginfo(point)
 
 		self._point = self.transform_listener.transformPoint('map', point)
 
