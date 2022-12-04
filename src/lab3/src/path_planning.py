@@ -257,29 +257,31 @@ def dijkstra(im, robot_loc, goal_loc):
 
 			# Check if neighbor is in the visited dictionary
 			if neighbor not in visited:
-				# If not, add it to the dictionary
-				visited[neighbor] = (node_score + edge_cost, node_ij, False)
+			    # If not, add it to the dictionary
+			    visited[neighbor] = (node_score + edge_cost, node_ij, False)
 
-				# Add the neighbor to the priority queue
-				heapq.heappush(priority_queue, (node_score + edge_cost, neighbor))
+			    # Add the neighbor to the priority queue
+			    heapq.heappush(priority_queue, (node_score + edge_cost, neighbor))
 			elif visited[neighbor][0] > node_score + edge_cost:
-				visited[neighbor] = (node_score + edge_cost, node_ij, False)
+			    visited[neighbor] = (node_score + edge_cost, node_ij, False)
 
 	# Now check that we actually found the goal node
 	try_2 = None
 	if not goal_loc in visited:
-		best = 1e30
-		for v in visited.items():
-			if v[0] is not None and v[0] < best:
-				best = v[0]
-				try_2 = v[1]
-				rospy.loginfo(f'Trying again with {v}: {try_2}')
+
+		# Find closest visited point
+		distances = np.array([np.sqrt((goal_loc[0] - x) ** 2 + (goal_loc[1] - y) ** 2) for x, y in visited])
+		min_idx = np.argmin(distances)
+
+		key, v = list(visited.items())[min_idx]
+
+		try_2 = key
+		rospy.loginfo(f'Trying again with {v}: {try_2}')
 
 		if try_2 is not None:
 			return dijkstra(im, robot_loc, try_2)
 
 		raise ValueError(f"Goal {goal_loc} not reached")
-		return []
 
 	path = []
 	path.append(goal_loc)

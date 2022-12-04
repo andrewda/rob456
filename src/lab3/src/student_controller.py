@@ -30,12 +30,12 @@ class StudentController(RobotController):
 		self._last_plan = None
 
 
-	def _update_path_callback(self, _a):
+	def _update_path_callback(self, _a=''):
 		rospy.loginfo(f'Got _update_path_callback: {_a}')
 
 		self.goal = None
 
-		self.do_map_update(self._point, self._map, self._map_data)
+		self.do_path_update(self._point, self._map, self._map_data)
 
 		rospy.loginfo('Done _update_path_callback!')
 
@@ -72,7 +72,7 @@ class StudentController(RobotController):
 		pass
 
 
-	def do_map_update(self, point, map, map_data):
+	def do_path_update(self, point, map, map_data):
 		if point is None:
 			rospy.loginfo('Point is none, returning')
 			return
@@ -81,7 +81,7 @@ class StudentController(RobotController):
 			rospy.loginfo('Got path update request, but already updated too recently')
 			return
 
-		if len(self._waypoints) > 0:
+		if self._waypoints is not None and len(self._waypoints) > 0:
 			rospy.loginfo(f'Got path update request, but {len(self._waypoints)} waypoints remain')
 			return
 
@@ -89,13 +89,13 @@ class StudentController(RobotController):
 		rospy.loginfo('Updating path.')
 		rospy.loginfo(self.action_client.get_state())
 
-		im = np.array(map.data).reshape(4000, 4000)
+		im = np.array(map.data).reshape(map.info.height, map.info.width)
 		im_thresh = path_planning.convert_image(im, 0.7, 0.9)
 
 		im_thresh_fattened = path_planning.fatten_image(im_thresh, 4)
 
-		x = int(point.point.x / map_data.resolution + 2000)
-		y = int(point.point.y / map_data.resolution + 2000)
+		x = int(point.point.x / map_data.resolution + map.info.width / 2)
+		y = int(point.point.y / map_data.resolution + map.info.height / 2)
 
 		robot_start_loc = (x, y)
 
@@ -132,6 +132,7 @@ if __name__ == '__main__':
 	# if you can get to all of these points without building a map first.  This is just to demonstrate how
 	# to call the function, and make the robot move as an example.
 	controller.set_waypoints(((-4, -3), (-4, 0), (5, 0)))
+	# controller._update_path_callback()
 
 	# Once you call this function, control is given over to the controller, and the robot will start to
 	# move.  This function will never return, so any code below it in the file will not be executed.
