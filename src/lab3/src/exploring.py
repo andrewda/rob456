@@ -177,7 +177,7 @@ def find_waypoints(im, path):
 		a2 = math.atan2(path[i + 1][1] - path[i][1], path[i + 1][0] - path[i][0])
 
 		# TODO: give this a little more tolerance, e.g. 0.1
-		if a1 != a2:
+		if abs(a1 - a2) > 0.5:
 			waypoints.append(path[i])
 
 	waypoints.append(path[0])

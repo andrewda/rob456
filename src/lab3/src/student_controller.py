@@ -68,7 +68,6 @@ class StudentController(RobotController):
 			map:		An OccupancyGrid containing the current version of the map.
 			map_data:	A MapMetaData containing the current map meta data.
 		'''
-
 		pass
 
 
@@ -87,7 +86,6 @@ class StudentController(RobotController):
 
 
 		rospy.loginfo('Updating path.')
-		rospy.loginfo(self.action_client.get_state())
 
 		im = np.array(map.data).reshape(map.info.height, map.info.width)
 		im_thresh = path_planning.convert_image(im, 0.7, 0.9)

@@ -4,8 +4,8 @@
 	<param name="use_sim_time" type="bool" value="true" />
 
 	<!-- Start up a simulator. -->
-	<!-- <include file="$(find stage_osu)/launch/simple_rooms.launch" /> -->
-	<node pkg="stage_ros" name="stage" type="stageros" args="$(find stage_osu)/config/simple2.world" />
+	<include file="$(find stage_osu)/launch/simple_rooms.launch" />
+	<!-- <node pkg="stage_ros" name="stage" type="stageros" args="$(find stage_osu)/config/simple2.world" /> -->
 
 	<!-- Start a custom rviz, and a logger so we can see the log messages we want. -->
 	<node pkg="rviz" name="rviz" type="rviz" args="-d $(find lab3)/config/nav.rviz" />

@@ -19,7 +19,7 @@ from lab2.msg import NavTargetAction, NavTargetResult, NavTargetFeedback
 from std_msgs.msg import String
 
 class Driver:
-	def __init__(self, position_source, threshold=0.1):
+	def __init__(self, position_source, threshold=0.5):
 		self._target_point = None
 		self._threshold = threshold
 
