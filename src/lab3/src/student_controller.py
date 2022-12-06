@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-
 import sys
 import rospy
 import signal
+import time
 
 from controller import RobotController
 
@@ -13,6 +13,7 @@ import numpy as np
 
 from actionlib_msgs.msg import GoalStatus
 from std_msgs.msg import String
+
 
 class StudentController(RobotController):
 	'''
@@ -27,7 +28,11 @@ class StudentController(RobotController):
 
 		self._update_path_sub = rospy.Subscriber('update_path', String, self._update_path_callback, queue_size=10)
 
-		self._last_plan = None
+		self.last_plan_at = None
+
+		self.last_progress_at = None
+		self.last_distance = None
+		self.last_waypoint_count = None
 
 
 	def _update_path_callback(self, _a=''):
@@ -51,9 +56,19 @@ class StudentController(RobotController):
 		Parameters:
 			distance:	The distance to the current goal.
 		'''
-		# TODO: implement this
-		# rospy.loginfo(f'Distance: {distance}')
-		pass
+
+		# Check if we've progressed
+		if self.last_progress_at is None or self.last_waypoint_count != len(self._waypoints) or (self.last_waypoint_count == len(self._waypoints) and self.last_distance > (distance + 0.05)):
+			self.last_progress_at = time.time()
+			self.last_distance = distance
+			self.last_waypoint_count = len(self._waypoints)
+
+		# If we haven't progressed in 10 seconds, replan
+		time_since_update = time.time() - self.last_progress_at
+		if time_since_update > 10:
+			self.do_path_update(self._point, self._map, self._map_data, force=True)
+
+		rospy.loginfo(f'Distance to goal: {distance} (# waypoints: {len(self._waypoints)}, time since progress: {time_since_update:.2f})')
 
 
 	def map_update(self, point, map, map_data):
@@ -71,51 +86,60 @@ class StudentController(RobotController):
 		pass
 
 
-	def do_path_update(self, point, map, map_data):
+	def do_path_update(self, point, map, map_data, force=False):
+		# If we don't have our current location, return
 		if point is None:
-			rospy.loginfo('Point is none, returning')
+			rospy.loginfo('Point is none, skipping path update')
 			return
 
-		if self._last_plan is not None and self._last_plan - rospy.Time.now() > rospy.Time(30):
-			rospy.loginfo('Got path update request, but already updated too recently')
+		# If we already made a path plan recently, return
+		if self.last_plan_at is not None and (time.time() - self.last_plan_at) < 5:
+			rospy.loginfo(f'Got path update request, but already updated too recently {time.time() - self.last_plan_at}')
 			return
 
-		if self._waypoints is not None and len(self._waypoints) > 0:
-			rospy.loginfo(f'Got path update request, but {len(self._waypoints)} waypoints remain')
-			return
+		# If we still have waypoints left to go, return (unless we force the generation)
+		if not force:
+			if self._waypoints is not None and len(self._waypoints) > 0:
+				rospy.loginfo(f'Got path update request, but {len(self._waypoints)} waypoints remain')
+				return
 
+		self.last_plan_at = time.time() 
 
-		rospy.loginfo('Updating path.')
+		rospy.loginfo(f'Updating path (force={force})')
 
+		# Reshape the 1D map data to an image grid and threshold it
 		im = np.array(map.data).reshape(map.info.height, map.info.width)
 		im_thresh = path_planning.convert_image(im, 0.7, 0.9)
 
+		# Fatten the walls so the robot has enough room to navigate our path
 		fatten_pixels = int(np.ceil(0.19 / map_data.resolution)) + 1
 		im_thresh_fattened = path_planning.fatten_image(im_thresh, fatten_pixels)
 
+		# Get the robot's starting position in map coordinates
 		x = int(point.point.x / map_data.resolution + map.info.width / 2)
 		y = int(point.point.y / map_data.resolution + map.info.height / 2)
-
 		robot_start_loc = (x, y)
 
+		# If we don't already have a goal, find one from the list of all possible goals
 		if self.goal is None:
 			all_unseen = exploring.find_all_possible_goals(im_thresh_fattened)
-			self.goal = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
+			if all_unseen is None:
+				rospy.loginfo('Done, Stopped!')
+				return
 
-		# plot_with_explore_points(im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, best_pt=best_unseen)
+			self.goal = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)
 
 		rospy.loginfo(f'Got best unseen! From {robot_start_loc} to {self.goal}')
 
+		# Plot a path with Dijkstra, and gather waypoints for the robot to follow
 		path = path_planning.dijkstra(im_thresh_fattened, robot_start_loc, self.goal)
 		waypoints = exploring.find_waypoints(im_thresh, path)
-		# path_planning.plot_with_path(im, im_thresh_fattened, zoom=0.1, robot_loc=robot_start_loc, goal_loc=best_unseen, path=waypoints)
 
+		# Convert waypoints back from map coordinates to robot world coordinates
 		waypoints = [((x - 2000) * map_data.resolution, (y - 2000) * map_data.resolution) for x, y in waypoints]
 
-		rospy.loginfo(waypoints)
-
+		# Set waypoints in the controller
 		controller.set_waypoints(waypoints)
-		# controller.send_points()
 
 		rospy.loginfo('Points have been sent!')
 
@@ -127,10 +151,7 @@ if __name__ == '__main__':
 	# Start the controller.
 	controller = StudentController()
 
-	# This will move the robot to a set of fixed waypoints.  You should not do this, since you don't know
-	# if you can get to all of these points without building a map first.  This is just to demonstrate how
-	# to call the function, and make the robot move as an example.
-	# controller.set_waypoints(((-4, -3), (-4, 0), (5, 0)))
+	# Plan an initial path
 	controller._update_path_callback()
 
 	# Once you call this function, control is given over to the controller, and the robot will start to

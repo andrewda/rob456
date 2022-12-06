@@ -1,53 +1,6 @@
 import numpy as np
 import math
 
-# def obstacle_avoidance(goal, laser_scan, thetas):
-#     goal_x = goal[0]
-#     goal_y = goal[1]
-
-#     # Initialize forward and rotational speeds to zero
-#     forward_speed = 0
-#     rotational_speed = 0
-    
-#     # Calculate the vector from the robot to the goal
-#     goal_vector = np.array([goal_x, goal_y])
-    
-#     # Calculate the magnitude of the goal vector
-#     goal_magnitude = np.linalg.norm(goal_vector)
-    
-#     # Calculate the unit vector of the goal vector
-#     goal_unit = goal_vector / goal_magnitude
-    
-#     # Loop through the laser scan and calculate the repulsive vectors
-#     for idx, distance in enumerate(laser_scan):
-#         # Calculate the angle of the obstacle from the robot's perspective
-#         angle = thetas[idx]
-        
-#         # Calculate the repulsive vector
-#         repulsive_vector = np.array([np.cos(angle), np.sin(angle)])
-        
-#         # Calculate the magnitude of the repulsive vector
-#         repulsive_magnitude = 1 / distance
-        
-#         # Calculate the unit vector of the repulsive vector
-#         repulsive_unit = repulsive_vector / repulsive_magnitude
-        
-#         # Add the repulsive vector to the goal vector
-#         goal_vector += repulsive_unit
-    
-#     # Calculate the magnitude of the updated goal vector
-#     goal_magnitude = np.linalg.norm(goal_vector)
-    
-#     # Calculate the unit vector of the updated goal vector
-#     goal_unit = goal_vector / goal_magnitude
-    
-#     # Set the forward speed to the magnitude of the updated goal vector
-#     forward_speed = goal_magnitude / 1000
-    
-#     # Set the rotational speed to the angle of the updated goal vector
-#     rotational_speed = np.arctan2(goal_unit[1], goal_unit[0])
-    
-#     return forward_speed, rotational_speed
 
 class ObstacleAvoidance:
     def __init__(self):
@@ -57,8 +10,8 @@ class ObstacleAvoidance:
 
         self.max_speed = 0.7
 
-        self.attractive_factor = 1.2
-        self.repulsion_factor = 0.005
+        self.attractive_factor = 1.5 / 2
+        self.repulsion_factor = 0.005 / 2
 
       
     def obstacle_avoidance(self, goal, distances, thetas):
@@ -90,9 +43,9 @@ class ObstacleAvoidance:
         desired_direction = total_force / force_distance
 
         # Calculate forward and rotational speeds
-        forward_speed = min(force_distance, 1) # Max forward speed of 1
+        forward_speed = np.clip(force_distance, -0.75, 0.75) # Max forward speed of 1
         rotational_speed = np.arctan2(desired_direction[1], desired_direction[0]) # Max rotational speed of 0.6
-        rotational_speed = min(rotational_speed, 0.6)
+        rotational_speed = np.clip(rotational_speed, -0.75, 0.75)
 
         x = np.abs(distances * np.sin(thetas))
 

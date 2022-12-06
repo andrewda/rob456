@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import rospy
 import sys
 
@@ -17,6 +16,7 @@ import tf
 
 from lab2.msg import NavTargetAction, NavTargetResult, NavTargetFeedback
 from std_msgs.msg import String
+
 
 class Driver:
 	def __init__(self, position_source, threshold=0.5):

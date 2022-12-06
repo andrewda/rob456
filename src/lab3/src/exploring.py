@@ -128,22 +128,21 @@ def find_all_possible_goals(im):
 
 	# All white pixels
 	free_spaces = np.argwhere(im == 255)
-	rospy.loginfo(f'free_spaces: {free_spaces.shape}')
 
 	# All pixels connected to a white pixel (eight connected)
 	all_connected = np.array([np.array(list(path_planning.eight_connected(i))) for i in free_spaces]).reshape(-1, 2)
-	rospy.loginfo(f'all_connected: {free_spaces.shape}')
 
 	# Of all_connected, the pixels that are not white and not black (< 255 and > 0)
 	unseen = np.array([(i, j) for i, j in all_connected if (im[i, j] < 255) & (im[i, j] > 0)])
-	rospy.loginfo(f'unseen: {free_spaces.shape}')
+
+	rospy.loginfo(f'Number of unseen: {len(unseen)}')
+	if len(unseen) < 250:
+		return None
 
 	# White spaces adjacent to unseen spaces
 	unseen_connected = np.array([list(path_planning.eight_connected(i)) for i in unseen]).reshape(-1, 2)
-	rospy.loginfo(f'unseen_connected: {free_spaces.shape}')
 
 	possible_goals = np.array([(j, i) for i, j in unseen_connected if (im[i, j] == 255)])
-	rospy.loginfo(f'possible_goals: {free_spaces.shape}')
 
 	return possible_goals
 
@@ -155,13 +154,18 @@ def find_best_point(im, possible_points, robot_loc):
 	@param robot_loc - location of the robot (in case you want to factor that in)
 	"""
 
-	rospy.loginfo(possible_points)
-	rospy.loginfo(robot_loc)
+	points_connected = np.array([np.array(list(path_planning.eight_connected(i))) for i in possible_points])
 
-	distances = np.array([np.sqrt((i[0] - robot_loc[0]) ** 2 + (i[1] - robot_loc[1]) ** 2) for i in possible_points])
-	max_idx = np.argmax(distances)
+	# count points that are unseen
+	unseen = (im[points_connected[:, 0], points_connected[:, 1]] < 255) & (im[points_connected[:, 0], points_connected[:, 1]] > 0)
+	unseen_counts = np.sum(unseen, axis=1)
 
-	return (possible_points[max_idx][0], possible_points[max_idx][1])
+	weights = unseen_counts / np.sum(unseen_counts)
+
+	# Randomly choose a point based on weights
+	selected_point_idx = np.random.choice(list(range(0, len(possible_points))), p=weights)
+
+	return (possible_points[selected_point_idx][0], possible_points[selected_point_idx][1])
 
 
 def find_waypoints(im, path):
@@ -176,11 +180,9 @@ def find_waypoints(im, path):
 		a1 = math.atan2(path[i][1] - path[i - 1][1], path[i][0] - path[i - 1][0])
 		a2 = math.atan2(path[i + 1][1] - path[i][1], path[i + 1][0] - path[i][0])
 
-		# TODO: give this a little more tolerance, e.g. 0.1
-		if abs(a1 - a2) > 0.5:
+		if abs(a1 - a2) > math.pi/6 or i % 20 == 0:
 			waypoints.append(path[i])
 
 	waypoints.append(path[0])
 
-	# return waypoints[::-1]
 	return waypoints
