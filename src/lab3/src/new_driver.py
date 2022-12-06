@@ -116,7 +116,6 @@ class Driver:
 				return
 		else:
 			self._update_path_pub.publish('123')
-			rospy.loginfo('No target point!')
 			command = Driver.zero_twist()
 
 		self._cmd_pub.publish(command)

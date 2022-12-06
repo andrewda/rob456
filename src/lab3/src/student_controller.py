@@ -36,13 +36,8 @@ class StudentController(RobotController):
 
 
 	def _update_path_callback(self, _a=''):
-		rospy.loginfo(f'Got _update_path_callback: {_a}')
-
 		self.goal = None
-
 		self.do_path_update(self._point, self._map, self._map_data)
-
-		rospy.loginfo('Done _update_path_callback!')
 
 
 	def distance_update(self, distance):
@@ -88,7 +83,7 @@ class StudentController(RobotController):
 
 	def do_path_update(self, point, map, map_data, force=False):
 		# If we don't have our current location, return
-		if point is None:
+		if point is None or map is None:
 			rospy.loginfo('Point is none, skipping path update')
 			return
 

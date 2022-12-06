@@ -72,22 +72,17 @@ class RobotController:
 
 
 	def _odom_callback(self, odom):
-		# rospy.loginfo('_odom_callback')
 		self._odom = odom
 
 		point = PointStamped()
 		point.header = self._odom.header
-		# point.header.stamp = rospy.Time.now() - rospy.Time(0.05)
+		point.header.stamp -= rospy.Time(0.05)
 		point.point = self._odom.pose.pose.position
-		# rospy.loginfo(point)
 
 		self._point = self.transform_listener.transformPoint('map', point)
 
-		# rospy.loginfo(self._point)
-
 
 	def _map_callback(self, map):
-		# rospy.loginfo('_map_callback')
 		self._map = map
 
 
