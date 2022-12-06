@@ -141,8 +141,9 @@ def find_all_possible_goals(im):
 
 	# White spaces adjacent to unseen spaces
 	unseen_connected = np.array([list(path_planning.eight_connected(i)) for i in unseen]).reshape(-1, 2)
+	unseen_connected_unique = np.unique(unseen_connected, axis=0)
 
-	possible_goals = np.array([(j, i) for i, j in unseen_connected if (im[i, j] == 255)])
+	possible_goals = np.array([(j, i) for i, j in unseen_connected_unique if (im[i, j] == 255)])
 
 	return possible_goals
 
@@ -156,11 +157,14 @@ def find_best_point(im, possible_points, robot_loc):
 
 	points_connected = np.array([np.array(list(path_planning.eight_connected(i))) for i in possible_points])
 
-	# count points that are unseen
+	# Count adjacent points that are unseen
 	unseen = (im[points_connected[:, 0], points_connected[:, 1]] < 255) & (im[points_connected[:, 0], points_connected[:, 1]] > 0)
 	unseen_counts = np.sum(unseen, axis=1)
 
-	weights = unseen_counts / np.sum(unseen_counts)
+	# Calculate point distances
+	distances = np.linalg.norm(possible_points - robot_loc)
+
+	weights = (unseen_counts / np.sum(unseen_counts)) * (distances / np.sum(distances))
 
 	# Randomly choose a point based on weights
 	selected_point_idx = np.random.choice(list(range(0, len(possible_points))), p=weights)
