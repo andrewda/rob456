@@ -1,4 +1,10 @@
-# ROB456 Final Project
+# ROB 456 Final Project
+
+This repository contains the code for our ROB 456 group final project. Our robot
+exploration code uses Dijkstra's algorithm to plan paths to unexplored parts of
+the map. The robot uses an [artifical potential field (APF)](https://link.springer.com/article/10.1186/s13638-019-1396-2)
+method to navigate between waypoints and actively avoid dynamic obstacles. See a
+demo of the robot exploring a world below:
 
 [demo.webm](https://user-images.githubusercontent.com/10191084/205789899-6c2bfac0-4054-4b97-a019-5434673b00d5.webm)
 
@@ -40,7 +46,7 @@ $ rosrun lab2 driver.py
 $ rosrun lab2 send_points.py
 ```
 
-### Lab 3
+### Lab 3 (Final Project)
 
 ```bash
 # Launch the world
