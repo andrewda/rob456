@@ -8,13 +8,17 @@ class ObstacleAvoidance:
         self.width = 0.38 # meters
         self.length = 0.44 # meters
 
-        self.max_speed = 0.7
-
         self.attractive_factor = 1.5 / 2
         self.repulsion_factor = 0.005 / 2
 
       
     def obstacle_avoidance(self, goal, distances, thetas):
+        """ Avoid obstacles using artificial potential fields. The goal provides
+        an attractive force on the robot, while obstacles create a repulsive
+        force. These forces combine to create a total force on the robot, which
+        is used to calculate forward and rotational speeds.
+        """
+
         # Calculate attractive force
         goal_vector = goal
         goal_distance = np.linalg.norm(goal_vector)
