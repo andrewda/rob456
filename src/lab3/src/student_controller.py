@@ -58,9 +58,9 @@ class StudentController(RobotController):
 			self.last_distance = distance
 			self.last_waypoint_count = len(self._waypoints)
 
-		# If we haven't progressed in 10 seconds, replan
+		# If we haven't progressed in 15 seconds, replan
 		time_since_update = time.time() - self.last_progress_at
-		if time_since_update > 10:
+		if time_since_update > 15:
 			self.do_path_update(self._point, self._map, self._map_data, force=True)
 
 		rospy.loginfo(f'Distance to goal: {distance} (# waypoints: {len(self._waypoints)}, time since progress: {time_since_update:.2f})')
@@ -120,6 +120,8 @@ class StudentController(RobotController):
 			all_unseen = exploring.find_all_possible_goals(im_thresh_fattened)
 			if all_unseen is None:
 				rospy.loginfo('Done, Stopped!')
+				rospy.signal_shutdown('Done exploring!')
+
 				return
 
 			self.goal = exploring.find_best_point(im_thresh_fattened, all_unseen, robot_loc=robot_start_loc)

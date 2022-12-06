@@ -15,8 +15,8 @@
 	<node pkg="gmapping" name="SLAM" type="slam_gmapping">
 		<remap from="scan" to="base_scan" />
 
-		<param name="map_update_interval" value="2" />
-		<param name="minimumScore" value="50" />
+		<param name="map_update_interval" value="3" />
+		<param name="minimumScore" value="100" />
 	</node>
 
 	<node pkg="lab3" name="driver" type="student_driver.py" />

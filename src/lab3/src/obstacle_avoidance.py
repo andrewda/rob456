@@ -47,9 +47,9 @@ class ObstacleAvoidance:
         desired_direction = total_force / force_distance
 
         # Calculate forward and rotational speeds
-        forward_speed = np.clip(force_distance, -0.6, 0.6) # Max forward speed of 1
+        forward_speed = np.clip(force_distance, -0.7, 0.7) # Max forward speed of 1
         rotational_speed = np.arctan2(desired_direction[1], desired_direction[0]) # Max rotational speed of 0.6
-        rotational_speed = np.clip(rotational_speed, -math.pi/6, math.pi/6)
+        rotational_speed = np.clip(rotational_speed, -math.pi/4, math.pi/4)
 
         x = np.abs(distances * np.sin(thetas))
 

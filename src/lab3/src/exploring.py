@@ -136,7 +136,7 @@ def find_all_possible_goals(im):
 	unseen = np.array([(i, j) for i, j in all_connected if (im[i, j] < 255) & (im[i, j] > 0)])
 
 	rospy.loginfo(f'Number of unseen: {len(unseen)}')
-	if len(unseen) < 250:
+	if len(unseen) < 350:
 		return None
 
 	# White spaces adjacent to unseen spaces
@@ -164,10 +164,13 @@ def find_best_point(im, possible_points, robot_loc):
 	# Calculate point distances
 	distances = np.linalg.norm(possible_points - robot_loc)
 
-	weights = (unseen_counts / np.sum(unseen_counts)) * (distances / np.sum(distances))
+	rospy.loginfo(f'Possible goals: {possible_points.shape[0]}')
+
+	# Calculate weights (and convert NaN to 0 to prevent errors)
+	weights = np.nan_to_num(unseen_counts * (distances / np.max(distances)))
 
 	# Randomly choose a point based on weights
-	selected_point_idx = np.random.choice(list(range(0, len(possible_points))), p=weights)
+	selected_point_idx = np.random.choice(list(range(0, len(possible_points))), p=weights/np.sum(weights))
 
 	return (possible_points[selected_point_idx][0], possible_points[selected_point_idx][1])
 
